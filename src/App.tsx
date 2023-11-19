@@ -12,7 +12,7 @@ import {
 import { IonReactRouter } from "@ionic/react-router";
 import { map, settings } from "ionicons/icons";
 
-import "./theme/tailwind.css";
+import "./theme/index.css";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -36,7 +36,7 @@ import { SettingsTab } from "./pages/SettingsTab";
 
 setupIonicReact();
 
-const App: React.FC = () => (
+const App = () => (
   <IonApp>
     <IonReactRouter>
       <IonTabs>

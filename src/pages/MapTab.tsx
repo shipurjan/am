@@ -4,7 +4,9 @@ import { Tab } from "../components/Tab";
 export const MapTab = () => {
   return (
     <Tab title={"Map"} size={"small"}>
-      <Map />
+      <div className="w-full h-full">
+        <Map />
+      </div>
     </Tab>
   );
 };
