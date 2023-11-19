@@ -31,8 +31,8 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
-import { Map } from "./pages/Map";
-import { Settings } from "./pages/Settings";
+import { MapTab } from "./pages/MapTab";
+import { SettingsTab } from "./pages/SettingsTab";
 
 setupIonicReact();
 
@@ -42,10 +42,10 @@ const App: React.FC = () => (
       <IonTabs>
         <IonRouterOutlet>
           <Route exact path="/map">
-            <Map />
+            <MapTab />
           </Route>
           <Route exact path="/settings">
-            <Settings />
+            <SettingsTab />
           </Route>
           <Route exact path="/">
             <Redirect to="/map" />
