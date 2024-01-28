@@ -3,13 +3,13 @@ import {
   IonHeader,
   IonPage,
   IonTitle,
-  IonToolbar,
-} from "@ionic/react";
-import { ReactNode } from "react";
+  IonToolbar
+} from '@ionic/react';
+import { ReactNode } from 'react';
 
 export type TabProps = {
   title: string;
-  size: "small" | "large";
+  size: 'small' | 'large';
   children: ReactNode;
 };
 export const Tab = ({ title, size, children }: TabProps) => (
