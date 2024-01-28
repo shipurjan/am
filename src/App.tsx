@@ -1,4 +1,4 @@
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route as ReactRoute } from 'react-router-dom';
 import {
   IonApp,
   IonButton,
@@ -11,6 +11,8 @@ import {
   IonItem,
   IonLabel,
   IonModal,
+  IonRadio,
+  IonRadioGroup,
   IonRouterOutlet,
   IonTabBar,
   IonTabButton,
@@ -20,7 +22,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { map, settings, navigate } from 'ionicons/icons';
+import { map, navigate } from 'ionicons/icons';
 
 import './theme/index.css';
 /* Core CSS required for Ionic components to work properly */
@@ -41,34 +43,56 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import { SettingsTab } from './pages/SettingsTab';
 import { Tab } from './components/Tab';
 import { Map } from './components/Map';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { OverlayEventDetail } from '@ionic/react/dist/types/components/react-component-lib/interfaces';
+import { Route } from './lib/types/types';
 
 setupIonicReact();
 
 const App = () => {
   // eslint-disable-next-line no-undef
   const modal = useRef<HTMLIonModalElement>(null);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
+  const [route, setRoute] = useState<Route | null>(null);
 
   function confirm() {
+    setRoute(selectedRoute);
     modal.current?.dismiss();
   }
 
   function onWillDismiss(ev: CustomEvent<OverlayEventDetail>) {
     void ev;
   }
+
+  function onWillPresent() {
+    const fetchRoutes = async () => {
+      try {
+        const response = await fetch('https://uni-am-api.onrender.com/routes');
+        const data = await response.json();
+        setRoutes(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchRoutes();
+  }
+
+  const compareWith = (o1: Route, o2: Route) => {
+    return o1.id === o2.id;
+  };
+
   return (
     <IonApp>
       <IonReactRouter>
         <IonTabs>
           <IonRouterOutlet>
-            <Route exact path="/map">
+            <ReactRoute exact path="/map">
               <Tab title={'Map'} size={'small'}>
                 <IonContent className="w-full h-full">
-                  <Map />
+                  <Map route={route} />
                   <IonFab slot="fixed" vertical="bottom" horizontal="end">
                     <IonFabButton id="open-modal">
                       <IonIcon icon={navigate} size="large"></IonIcon>
@@ -77,6 +101,7 @@ const App = () => {
                   <IonModal
                     ref={modal}
                     trigger="open-modal"
+                    onWillPresent={() => onWillPresent()}
                     onWillDismiss={(ev) => onWillDismiss(ev)}>
                     <IonHeader>
                       <IonToolbar>
@@ -94,29 +119,42 @@ const App = () => {
                       </IonToolbar>
                     </IonHeader>
                     <IonContent className="ion-padding">
-                      <IonItem>Hello</IonItem>
+                      <IonRadioGroup
+                        value={selectedRoute?.id}
+                        // @ts-expect-error no types
+                        compareWith={compareWith}
+                        onIonChange={(ev) =>
+                          setSelectedRoute(
+                            routes.find((r) => r.id === ev.detail.value) ?? null
+                          )
+                        }>
+                        {routes.map((route) => (
+                          <IonItem key={route.id}>
+                            <IonRadio value={route.id}>
+                              {route.description}
+                            </IonRadio>
+                          </IonItem>
+                        ))}
+                        {routes.length === 0 && (
+                          <div>
+                            Brak tras - prawdopodobnie Serwis REST nie jest
+                            uruchomiony
+                          </div>
+                        )}
+                      </IonRadioGroup>
                     </IonContent>
                   </IonModal>
                 </IonContent>
               </Tab>
-            </Route>
-            <Route exact path="/settings">
-              <Tab title={'Settings'} size={'small'}>
-                <SettingsTab />
-              </Tab>
-            </Route>
-            <Route exact path="/">
+            </ReactRoute>
+            <ReactRoute exact path="/">
               <Redirect to="/map" />
-            </Route>
+            </ReactRoute>
           </IonRouterOutlet>
           <IonTabBar slot="bottom">
             <IonTabButton tab="map" href="/map">
               <IonIcon aria-hidden="true" icon={map} />
               <IonLabel>Mapa</IonLabel>
-            </IonTabButton>
-            <IonTabButton tab="settings" href="/settings">
-              <IonIcon aria-hidden="true" icon={settings} />
-              <IonLabel>Ustawienia</IonLabel>
             </IonTabButton>
           </IonTabBar>
         </IonTabs>

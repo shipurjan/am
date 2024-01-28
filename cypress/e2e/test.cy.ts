@@ -11,10 +11,3 @@ describe('Check if /map route has content', () => {
     cy.get('ion-content').should('exist');
   });
 });
-
-describe('Check if /settings route has content', () => {
-  it('Visits the /settings url', () => {
-    cy.visit('/settings');
-    cy.get('ion-content').should('exist');
-  });
-});

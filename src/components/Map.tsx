@@ -1,10 +1,11 @@
 import { LatLngExpression } from 'leaflet';
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
-import RoutingMachine from './RoutingMachine';
-import { useEffect, useState } from 'react';
+import RoutingMachineComponent from './RoutingMachine';
+import { useEffect, useMemo, useState } from 'react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import L from 'leaflet';
 import walk from '../assets/svg/walk.svg';
+import { Route } from '../lib/types/types';
 
 const markerIcon = L.icon({
   iconUrl: walk,
@@ -21,7 +22,7 @@ function CapacitorPositionToLatLngExpression(
   return [position?.coords.latitude ?? 0, position?.coords.longitude ?? 0];
 }
 
-export const Map = () => {
+export const Map = ({ route }: { route: Route | null }) => {
   const [position, setPosition] = useState<Position | null>(null);
 
   useEffect(() => {
@@ -38,6 +39,29 @@ export const Map = () => {
       }
     );
   }, []);
+
+  const RoutingMachine = useMemo(
+    () =>
+      RoutingMachineComponent({
+        options: {
+          waypoints: route?.waypoints.map((w) =>
+            L.latLng(w.latitude, w.longitude)
+          ),
+          containerClassName: 'hidden',
+          lineOptions: {
+            styles: [{ color: '#FF0000', weight: 5 }],
+            extendToWaypoints: true,
+            missingRouteTolerance: 1
+          },
+          show: false,
+          addWaypoints: false,
+          routeWhileDragging: false,
+          fitSelectedRoutes: true,
+          showAlternatives: false
+        }
+      }),
+    [route]
+  );
 
   if (position === null)
     return (
@@ -71,5 +95,6 @@ const MapEventHandler = () => {
   useEffect(() => {
     map.invalidateSize();
   }, []);
+
   return null;
 };
