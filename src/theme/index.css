@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  body {
+    @apply p-0 m-0;
+  }
+
+  html,
+  body,
+  #map {
+    @apply h-full w-[100vw];
+  }
+}
