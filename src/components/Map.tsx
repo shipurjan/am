@@ -6,6 +6,7 @@ import { Geolocation, Position } from '@capacitor/geolocation';
 import L from 'leaflet';
 import walk from '../assets/svg/walk.svg';
 import { Route } from '../lib/types/types';
+import { distance } from '../lib/utils/distance';
 
 const markerIcon = L.icon({
   iconUrl: walk,
@@ -24,6 +25,20 @@ function CapacitorPositionToLatLngExpression(
 
 export const Map = ({ route }: { route: Route | null }) => {
   const [position, setPosition] = useState<Position | null>(null);
+  useEffect(() => {
+    route?.waypoints.forEach((w) => {
+      const dist_km = distance(
+        w.latitude,
+        w.longitude,
+        position?.coords.latitude ?? 0,
+        position?.coords.longitude ?? 0,
+        'K'
+      );
+      if (dist_km < 0.01) {
+        console.log('waypoint reached');
+      }
+    });
+  }, [position, route]);
 
   useEffect(() => {
     Geolocation.watchPosition(
@@ -44,9 +59,12 @@ export const Map = ({ route }: { route: Route | null }) => {
     () =>
       RoutingMachineComponent({
         options: {
-          waypoints: route?.waypoints.map((w) =>
-            L.latLng(w.latitude, w.longitude)
-          ),
+          waypoints: [
+            L.latLng(CapacitorPositionToLatLngExpression(position)),
+            ...(route?.waypoints.map((w) =>
+              L.latLng(w.latitude, w.longitude)
+            ) ?? [])
+          ],
           containerClassName: 'hidden',
           lineOptions: {
             styles: [{ color: '#FF0000', weight: 5 }],
