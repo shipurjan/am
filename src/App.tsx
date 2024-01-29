@@ -22,7 +22,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { map, navigate } from 'ionicons/icons';
+import { map, navigate, analytics } from 'ionicons/icons';
 
 import './theme/index.css';
 /* Core CSS required for Ionic components to work properly */
@@ -54,6 +54,7 @@ setupIonicReact();
 const App = () => {
   // eslint-disable-next-line no-undef
   const modal = useRef<HTMLIonModalElement>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [route, setRoute] = useState<Route | null>(null);
@@ -69,6 +70,7 @@ const App = () => {
 
   function onWillPresent() {
     const fetchRoutes = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch('https://uni-am-api.onrender.com/routes');
         const data = await response.json();
@@ -76,6 +78,7 @@ const App = () => {
       } catch (err) {
         console.error(err);
       }
+      setIsLoading(false);
     };
     fetchRoutes();
   }
@@ -89,6 +92,31 @@ const App = () => {
       <IonReactRouter>
         <IonTabs>
           <IonRouterOutlet>
+            <ReactRoute exact path="/route">
+              <Tab title={'Trasa'} size={'small'}>
+                <IonContent className="w-full h-full">
+                  <div className="flex flex-col h-full p-2">
+                    {route !== null && (
+                      <div>
+                        <h2 className="font-bold">
+                          Trasa "{route.description}"
+                        </h2>
+                        <ul className="flex flex-col gap-2 pl-2">
+                          {route.waypoints.map((waypoint) => (
+                            <li>
+                              <p className=" text-lg font-semibold">
+                                {waypoint.name}
+                              </p>
+                              <p>{waypoint.description}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </IonContent>
+              </Tab>
+            </ReactRoute>
             <ReactRoute exact path="/map">
               <Tab title={'Map'} size={'small'}>
                 <IonContent className="w-full h-full">
@@ -135,7 +163,8 @@ const App = () => {
                             </IonRadio>
                           </IonItem>
                         ))}
-                        {routes.length === 0 && (
+                        {isLoading && <div>Ładowanie...</div>}
+                        {!isLoading && routes.length === 0 && (
                           <div>
                             Brak tras - prawdopodobnie Serwis REST nie jest
                             uruchomiony
@@ -155,6 +184,10 @@ const App = () => {
             <IonTabButton tab="map" href="/map">
               <IonIcon aria-hidden="true" icon={map} />
               <IonLabel>Mapa</IonLabel>
+            </IonTabButton>
+            <IonTabButton tab="route" href="/route">
+              <IonIcon aria-hidden="true" icon={analytics} />
+              <IonLabel>Trasa</IonLabel>
             </IonTabButton>
           </IonTabBar>
         </IonTabs>
