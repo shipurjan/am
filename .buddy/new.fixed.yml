@@ -1,0 +1,10 @@
+- sandbox: new
+  name: new
+  os: ubuntu:24.04
+  resources: MEDIUM
+  app_type: CMD
+  endpoints:
+    tn731a4842_d7ff_4421_8465_8ab624a39ae7:
+      endpoint: 80
+      region: EU
+      domain: agent-dev.net
